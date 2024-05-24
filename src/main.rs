@@ -19,6 +19,12 @@ fn main() {
             }
         }
 
-        println!("{command}: command not found");
+        if command.starts_with("echo ") {
+            if let Some((_, to_echo)) = command.split_once(' ') {
+                println!("{to_echo}");
+            }
+        } else {
+            println!("{command}: command not found");
+        }
     }
 }
