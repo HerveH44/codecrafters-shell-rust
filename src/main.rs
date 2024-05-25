@@ -29,16 +29,14 @@ fn main() {
 }
 
 pub fn parse_input(input: &str) -> (Option<String>, Option<String>) {
-    let v = input
-        .split(' ')
-        .filter(|i| !i.is_empty())
-        .map(|i| i.to_owned())
-        .collect::<Vec<String>>();
+    if input.is_empty() {
+        return (None, None);
+    }
 
-    match v.len() {
-        0 => (None, None),
-        1 => (Some(v[0].to_owned()), None),
-        _ => (Some(v[0].to_owned()), Some(v[1].to_owned())),
+    let split_input = input.split_once(' ');
+    match split_input {
+        None => (Some(input.to_owned()), None),
+        Some((cmd, args)) => (Some(cmd.to_owned()), Some(args.to_owned())),
     }
 }
 
