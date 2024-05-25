@@ -1,6 +1,6 @@
 use std::{env, path::PathBuf};
 
-pub fn search_builtin_func(input: &str) -> Option<fn(Vec<String>)> {
+pub fn search_builtin_func(input: &str) -> Option<fn(Vec<&str>)> {
     match input {
         "exit" => Some(exit),
         "echo" => Some(echo),
@@ -9,12 +9,12 @@ pub fn search_builtin_func(input: &str) -> Option<fn(Vec<String>)> {
     }
 }
 
-fn echo(args: Vec<String>) {
+fn echo(args: Vec<&str>) {
     let args = args.join(" ");
     println!("{args}");
 }
 
-fn exit(args: Vec<String>) {
+fn exit(args: Vec<&str>) {
     if args.is_empty() {
         println!("exit takes at least one argument");
         return;
@@ -28,7 +28,7 @@ fn exit(args: Vec<String>) {
     );
 }
 
-fn type_builtin(args: Vec<String>) {
+fn type_builtin(args: Vec<&str>) {
     if args.is_empty() {
         println!("type should take at one argument");
         return;
