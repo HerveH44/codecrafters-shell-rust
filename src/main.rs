@@ -36,15 +36,6 @@ fn get_input() -> String {
     input
 }
 
-fn run_program(cmd: &str, args: Vec<&str>) {
-    let output = Command::new(cmd)
-        .args(args)
-        .output()
-        .expect("Failed to run the program");
-    io::stdout().write_all(&output.stdout).unwrap();
-    io::stderr().write_all(&output.stderr).unwrap();
-}
-
 pub fn parse_input(input: &str) -> (Option<&str>, Vec<&str>) {
     if input.is_empty() {
         return (None, vec![]);
@@ -55,6 +46,15 @@ pub fn parse_input(input: &str) -> (Option<&str>, Vec<&str>) {
         None => (Some(input), vec![]),
         Some((cmd, args)) => (Some(cmd), args.split(' ').collect()),
     }
+}
+
+fn run_program(cmd: &str, args: Vec<&str>) {
+    let output = Command::new(cmd)
+        .args(args)
+        .output()
+        .expect("Failed to run the program");
+    io::stdout().write_all(&output.stdout).unwrap();
+    io::stderr().write_all(&output.stderr).unwrap();
 }
 
 #[cfg(test)]
