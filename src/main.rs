@@ -29,17 +29,20 @@ fn main() {
         if let Some(builtin_func) = search_builtin_func(&cmd) {
             builtin_func(args);
         } else if search_path(&cmd).is_some() {
-            let output = Command::new(cmd)
-                .args(args)
-                .output()
-                .expect("Failed to run the program");
-            println!("status: {}", output.status);
-            io::stdout().write_all(&output.stdout).unwrap();
-            io::stderr().write_all(&output.stderr).unwrap();
+            run_program(&cmd, args);
         } else {
             println!("{cmd}: command not found");
         }
     }
+}
+
+fn run_program(cmd: &str, args: Vec<String>) {
+    let output = Command::new(cmd)
+        .args(args)
+        .output()
+        .expect("Failed to run the program");
+    io::stdout().write_all(&output.stdout).unwrap();
+    io::stderr().write_all(&output.stderr).unwrap();
 }
 
 pub fn parse_input(input: &str) -> (Option<String>, Vec<String>) {
