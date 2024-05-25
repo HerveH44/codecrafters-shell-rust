@@ -38,7 +38,7 @@ fn type_builtin(args: &mut Split<char>) {
         }
         println!("{cmd} not found");
     } else {
-        println!("type should take at one argument");
+        println!("type should take at least one argument");
     }
 }
 
