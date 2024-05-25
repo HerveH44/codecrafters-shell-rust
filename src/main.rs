@@ -3,7 +3,7 @@ pub mod builtins;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
-use crate::builtins::search;
+use crate::builtins::search_builtin_func;
 
 fn main() {
     loop {
@@ -14,29 +14,37 @@ fn main() {
         let stdin = io::stdin();
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
+
+        // Parse input
         let (cmd, args) = parse_input(input.trim());
+
+        // nothing written
         if cmd.is_none() {
             continue;
         }
-        let cmd = cmd.unwrap();
 
-        if let Some(func) = search(&cmd) {
-            func(args);
+        // Check if built in command knows it
+        let cmd = cmd.unwrap();
+        if let Some(builtin_func) = search_builtin_func(&cmd) {
+            builtin_func(args);
         } else {
             println!("{cmd}: command not found");
         }
     }
 }
 
-pub fn parse_input(input: &str) -> (Option<String>, Option<String>) {
+pub fn parse_input(input: &str) -> (Option<String>, Vec<String>) {
     if input.is_empty() {
-        return (None, None);
+        return (None, vec![]);
     }
 
     let split_input = input.split_once(' ');
     match split_input {
-        None => (Some(input.to_owned()), None),
-        Some((cmd, args)) => (Some(cmd.to_owned()), Some(args.to_owned())),
+        None => (Some(input.to_owned()), vec![]),
+        Some((cmd, args)) => (
+            Some(cmd.to_owned()),
+            args.split(' ').map(|s| s.to_owned()).collect(),
+        ),
     }
 }
 
@@ -49,7 +57,7 @@ mod tests {
         let (cmd, args) = parse_input("exit 0");
 
         assert_eq!(Some("exit".to_owned()), cmd);
-        assert_eq!(Some("0".to_owned()), args);
+        assert_eq!(vec!["0"], args);
     }
 
     #[test]
@@ -57,6 +65,6 @@ mod tests {
         let (cmd, args) = parse_input("");
 
         assert_eq!(None, cmd);
-        assert_eq!(None, args);
+        assert_eq!(vec![] as Vec<String>, args);
     }
 }
