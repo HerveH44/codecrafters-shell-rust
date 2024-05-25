@@ -47,7 +47,7 @@ fn type_builtin(args: Vec<String>) {
     println!("{cmd} not found");
 }
 
-fn search_path(cmd: &str) -> Option<PathBuf> {
+pub fn search_path(cmd: &str) -> Option<PathBuf> {
     if let Some(paths) = env::var_os("PATH") {
         for path in env::split_paths(&paths) {
             let possible_path = path.join(cmd);

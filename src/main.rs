@@ -2,8 +2,9 @@ pub mod builtins;
 
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::process::Command;
 
-use crate::builtins::search_builtin_func;
+use crate::builtins::{search_builtin_func, search_path};
 
 fn main() {
     loop {
@@ -27,8 +28,14 @@ fn main() {
         let cmd = cmd.unwrap();
         if let Some(builtin_func) = search_builtin_func(&cmd) {
             builtin_func(args);
-        } else {
-            println!("{cmd}: command not found");
+        } else if search_path(&cmd).is_some() {
+            let output = Command::new(cmd)
+                .args(args)
+                .output()
+                .expect("Failed to run the program");
+            println!("status: {}", output.status);
+            io::stdout().write_all(&output.stdout).unwrap();
+            io::stderr().write_all(&output.stderr).unwrap();
         }
     }
 }
