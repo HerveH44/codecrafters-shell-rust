@@ -1,26 +1,29 @@
 pub mod builtins;
 
-#[allow(unused_imports)]
 use std::io::{self, Write};
 use std::process::Command;
+use std::str::Split;
 
-use crate::builtins::{search_builtin_func, search_path};
+use builtins::{search_builtin_func, search_path};
 
 fn main() {
     loop {
         print_prompt();
         let input = get_input();
-        let (cmd, args) = parse_input(input.trim());
-
-        if let Some(cmd) = cmd {
-            if let Some(builtin_func) = search_builtin_func(cmd) {
-                builtin_func(args);
-            } else if search_path(cmd).is_some() {
-                run_program(cmd, args);
-            } else {
-                println!("{cmd}: command not found");
-            }
+        let mut args = input.split(' ');
+        if let Some(cmd) = args.next() {
+            handle_command(cmd, args);
         }
+    }
+}
+
+fn handle_command(cmd: &str, mut args: Split<char>) {
+    if let Some(builtin_func) = search_builtin_func(cmd) {
+        builtin_func(&mut args);
+    } else if search_path(cmd).is_some() {
+        run_program(cmd, &mut args);
+    } else {
+        println!("{cmd}: command not found");
     }
 }
 
@@ -36,44 +39,11 @@ fn get_input() -> String {
     input
 }
 
-pub fn parse_input(input: &str) -> (Option<&str>, Vec<&str>) {
-    if input.is_empty() {
-        return (None, vec![]);
-    }
-
-    let split_input = input.split_once(' ');
-    match split_input {
-        None => (Some(input), vec![]),
-        Some((cmd, args)) => (Some(cmd), args.split(' ').collect()),
-    }
-}
-
-fn run_program(cmd: &str, args: Vec<&str>) {
+fn run_program(cmd: &str, args: &mut Split<char>) {
     let output = Command::new(cmd)
         .args(args)
         .output()
         .expect("Failed to run the program");
     io::stdout().write_all(&output.stdout).unwrap();
     io::stderr().write_all(&output.stderr).unwrap();
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::parse_input;
-
-    #[test]
-    fn can_parse_command_and_return_args() {
-        let (cmd, args) = parse_input("exit 0");
-
-        assert_eq!(Some("exit"), cmd);
-        assert_eq!(vec!["0"], args);
-    }
-
-    #[test]
-    fn if_no_command_exists_should_return_none() {
-        let (cmd, args) = parse_input("");
-
-        assert_eq!(None, cmd);
-        assert_eq!(vec![] as Vec<String>, args);
-    }
 }

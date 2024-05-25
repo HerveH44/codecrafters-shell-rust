@@ -1,6 +1,6 @@
-use std::{env, path::PathBuf};
+use std::{env, path::PathBuf, str::Split};
 
-pub fn search_builtin_func(input: &str) -> Option<fn(Vec<&str>)> {
+pub fn search_builtin_func(input: &str) -> Option<fn(&mut Split<char>)> {
     match input {
         "exit" => Some(exit),
         "echo" => Some(echo),
@@ -9,51 +9,45 @@ pub fn search_builtin_func(input: &str) -> Option<fn(Vec<&str>)> {
     }
 }
 
-fn echo(args: Vec<&str>) {
-    let args = args.join(" ");
+fn echo(args: &mut Split<char>) {
+    let args = args.collect::<Vec<_>>().join(" ");
     println!("{args}");
 }
 
-fn exit(args: Vec<&str>) {
-    if args.is_empty() {
+fn exit(args: &mut Split<char>) {
+    if let Some(first_arg) = args.next() {
+        if let Ok(exit_code) = first_arg.parse::<i32>() {
+            std::process::exit(exit_code);
+        }
+        println!("exit should be followed by a number. Found {first_arg}");
+    } else {
         println!("exit takes at least one argument");
-        return;
     }
-
-    let exit_code = &args[0];
-    std::process::exit(
-        exit_code
-            .parse::<i32>()
-            .expect("exit should be followed by a number"),
-    );
 }
 
-fn type_builtin(args: Vec<&str>) {
-    if args.is_empty() {
+fn type_builtin(args: &mut Split<char>) {
+    if let Some(cmd) = args.next() {
+        if search_builtin_func(cmd).is_some() {
+            println!("{cmd} is a shell builtin");
+            return;
+        }
+
+        if let Some(path) = search_path(cmd) {
+            println!("{cmd} is {}", path.display());
+            return;
+        }
+        println!("{cmd} not found");
+    } else {
         println!("type should take at one argument");
-        return;
     }
-
-    let cmd = &args[0];
-    if search_builtin_func(cmd).is_some() {
-        println!("{cmd} is a shell builtin");
-        return;
-    }
-
-    if let Some(path) = search_path(cmd) {
-        println!("{cmd} is {}", path.display());
-        return;
-    }
-    println!("{cmd} not found");
 }
 
 pub fn search_path(cmd: &str) -> Option<PathBuf> {
-    if let Some(paths) = env::var_os("PATH") {
-        for path in env::split_paths(&paths) {
-            let possible_path = path.join(cmd);
-            if possible_path.exists() {
-                return Some(possible_path);
-            }
+    let paths = env::var_os("PATH")?;
+    for path in env::split_paths(&paths) {
+        let possible_path = path.join(cmd);
+        if possible_path.exists() {
+            return Some(possible_path);
         }
     }
     None
