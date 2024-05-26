@@ -44,11 +44,7 @@ fn type_builtin(args: &mut Split<char>) {
 
 pub fn search_path(cmd: &str) -> Option<PathBuf> {
     let paths = env::var_os("PATH")?;
-    for path in env::split_paths(&paths) {
-        let possible_path = path.join(cmd);
-        if possible_path.exists() {
-            return Some(possible_path);
-        }
-    }
-    None
+    env::split_paths(&paths)
+        .map(|path| path.join(cmd))
+        .find(|path| path.exists())
 }
