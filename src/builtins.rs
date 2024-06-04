@@ -5,6 +5,7 @@ pub fn search_builtin_func(input: &str) -> Option<fn(&mut Split<char>)> {
         "exit" => Some(exit),
         "echo" => Some(echo),
         "type" => Some(type_builtin),
+        "pwd" => Some(pwd),
         _ => None,
     }
 }
@@ -40,6 +41,11 @@ fn type_builtin(args: &mut Split<char>) {
     } else {
         println!("type should take at least one argument");
     }
+}
+
+fn pwd(_args: &mut Split<char>) {
+    let current_dir = env::current_dir().unwrap();
+    println!("{}", current_dir.display());
 }
 
 pub fn search_path(cmd: &str) -> Option<PathBuf> {
