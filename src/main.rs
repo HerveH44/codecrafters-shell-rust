@@ -36,7 +36,7 @@ fn get_input() -> String {
     let stdin = io::stdin();
     let mut input = String::new();
     stdin.read_line(&mut input).unwrap();
-    input
+    input.trim().to_owned()
 }
 
 fn run_program(cmd: &str, args: &mut Split<char>) {
