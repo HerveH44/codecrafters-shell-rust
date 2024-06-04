@@ -1,4 +1,8 @@
-use std::{env, path::PathBuf, str::Split};
+use std::{
+    env::{self, current_dir},
+    path::{Path, PathBuf},
+    str::Split,
+};
 
 pub fn search_builtin_func(input: &str) -> Option<fn(&mut Split<char>)> {
     match input {
@@ -6,6 +10,7 @@ pub fn search_builtin_func(input: &str) -> Option<fn(&mut Split<char>)> {
         "echo" => Some(echo),
         "type" => Some(type_builtin),
         "pwd" => Some(pwd),
+        "cd" => Some(cd),
         _ => None,
     }
 }
@@ -46,6 +51,13 @@ fn type_builtin(args: &mut Split<char>) {
 fn pwd(_args: &mut Split<char>) {
     let current_dir = env::current_dir().unwrap();
     println!("{}", current_dir.display());
+}
+
+fn cd(args: &mut Split<char>) {
+    let path = args.next().unwrap();
+    if env::set_current_dir(Path::new(path)).is_err() {
+        println!("cd {path}: No such file or directory")
+    };
 }
 
 pub fn search_path(cmd: &str) -> Option<PathBuf> {
