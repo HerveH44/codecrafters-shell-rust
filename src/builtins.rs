@@ -56,7 +56,7 @@ fn pwd(_args: &mut Split<char>) {
 fn cd(args: &mut Split<char>) {
     let path = args.next().unwrap();
     if env::set_current_dir(Path::new(path)).is_err() {
-        println!("cd {path}: No such file or directory")
+        println!("{path}: No such file or directory")
     };
 }
 
