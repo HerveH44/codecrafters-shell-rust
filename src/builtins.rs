@@ -49,19 +49,29 @@ fn type_builtin(args: &mut Split<char>) {
 }
 
 fn pwd(_args: &mut Split<char>) {
-    let current_dir = env::current_dir().unwrap();
-    println!("{}", current_dir.display());
+    match env::current_dir() {
+        Ok(current_dir) => {
+            println!("{}", current_dir.display());
+        }
+        Err(_) => {
+            println!("could not find current dir");
+        }
+    }
 }
 
 fn cd(args: &mut Split<char>) {
-    let path = args.next().unwrap();
-    if path == "~" {
-        if let Some(home_path) = env::var_os("HOME") {
-            change_directory(home_path.to_str().unwrap());
+    let path_string = match args.next().unwrap() {
+        "~" => {
+            if let Some(home_path) = env::var_os("HOME") {
+                home_path.to_os_string().into_string().unwrap()
+            } else {
+                println!("could not find HOME env var");
+                return;
+            }
         }
-    } else {
-        change_directory(path);
+        other => other.to_string(),
     };
+    change_directory(&path_string);
 }
 
 fn change_directory(path: &str) {
