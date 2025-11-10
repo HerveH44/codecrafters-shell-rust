@@ -17,6 +17,10 @@ pub fn search_builtin_func(input: &str) -> Option<fn(&mut Split<char>)> {
 
 fn echo(args: &mut Split<char>) {
     let args = args.collect::<Vec<_>>().join(" ");
+
+    // remove single quotes
+    let args: String = args.split("'").collect();
+
     println!("{args}");
 }
 
